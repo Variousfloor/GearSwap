@@ -347,7 +347,7 @@ data.jobs.dual_wield_jobs = S{'THF','BLU','NIN','DNC'}
 -- Slot Related Lists
 -------------------------------------------------------------------------------------------------------------------
 data.slots = {}
-data.slots.slot_names = S{'main','sub','range','ranged','ammo','head','neck','ear1','lear','left_ear','ear2','rear','right_ear','ring1','lring','left_ring','ring2','rring','right_ring','back','waist','legs','feet'}
+data.slots.slot_names = S{'main','sub','range','ranged','ammo','head','neck','ear1','lear','left_ear','ear2','rear','right_ear','body','hands','ring1','lring','left_ring','ring2','rring','right_ring','back','waist','legs','feet'}
 data.slots.weapon_slots = {'main','sub','range','ranged','ammo'}
 
 -------------------------------------------------------------------------------------------------------------------
