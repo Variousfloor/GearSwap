@@ -562,10 +562,10 @@ function get_table_from_string(path)
 	return current
 end
 
-function remove_table_value(table, value)
-	for i = #table, 1, -1 do
-		if table[i] == value then
-			table.remove(table, i)
+function remove_table_value(table_name, value)
+	for i = #table_name, 1, -1 do
+		if table_name[i] == value then
+			table.remove(table_name, i)
 		end
 	end
 end
@@ -634,7 +634,9 @@ function silent_can_use(action, action_type)
 		end
 	elseif action_type == '/ja' then
 		local available_abilities = windower.ffxi.get_ability_recasts()
-		if available_abilities[action_id] then
+		local ability_recast_id = res.job_abilities[action_id].recast_id
+		
+		if available_abilities[ability_recast_id] then
 			silent_can_use_cache['/ja'][action] = true
 		else
 			silent_can_use_cache['/ja'][action] = false
@@ -2474,6 +2476,26 @@ function check_ws_acc()
 	end
 end
 
+function has_shield_access()
+	if state.Weapons.value == 'None' or state.UnlockWeapons.value then
+		return true
+	end
+
+	local sub_id = 1
+
+	if sets.weapons[state.Weapons.value] and sets.weapons[state.Weapons.value].sub then
+		sub_id = get_item_id_by_name(sets.weapons[state.Weapons.value].sub) or 1
+	else
+		sub_id = get_item_id_by_name(player.equipment.sub) or 1
+	end
+	
+	if res.items[sub_id].shield_size then
+		return true
+	end
+	
+	return false
+end
+
 --Checks to see if you're 'Fencing', 'Dual Wielding', or 'Hand-to-Hand', or 'Two-Handed', or 'Unarmed'
 function wielding(wield_check)
 	local wield_type
@@ -2590,7 +2612,7 @@ function has_finishing_moves()
 	elseif buffactive['Finishing Move (6+)'] then
 		return 6
 	else
-		return false
+		return 0
 	end
 end
 

@@ -223,7 +223,7 @@ function init_gear_sets()
 	sets.weapons.ProcGreatSword = {main="Lament",sub=empty}
 	sets.weapons.ProcScythe = {main="Ark Scythe",sub=empty}
 	sets.weapons.ProcPolearm = {main="Pitchfork +1",sub=empty}
-	sets.weapons.ProcGreatKatana = {main="Hardwood Katana",sub=empty}
+	sets.weapons.ProcGreatKatana = {main="Lotus Katana",sub=empty}
 end
 
 -- Select default macro book on initial load or subjob change.

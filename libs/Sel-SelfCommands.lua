@@ -203,22 +203,17 @@ function do_stun(target)
 
 	if not (buffactive.amnesia or buffactive.impairment) then
 		local abil_recasts = windower.ffxi.get_ability_recasts()
-		local sub_id
 
-		if state.Weapons.value ~= 'None' and sets.weapons[state.Weapons.value] then
-			local sub_id = get_item_id_by_name(sets.weapons[state.Weapons.value].sub) or get_item_id_by_name(player.equipment.sub) or nil
-		end
-	
-		if (player.main_job == 'PLD' or player.sub_job == 'PLD') and res.items[sub_id].shield_size and abil_recasts[73] < latency then
+		if silent_can_ability('Shield Bash') and has_shield_access() and abil_recasts[73] < latency then
 			windower.chat.input('/ja "Shield Bash" '..target) return true
-		elseif (player.main_job == 'DRK' or player.sub_job == 'DRK') and abil_recasts[88] < latency then
+		elseif silent_can_ability('Weapon Bash') and abil_recasts[88] < latency then
 			windower.chat.input('/ja "Weapon Bash" '..target) return true
 		elseif player.main_job == 'SMN' and pet.name == "Ramuh" and abil_recasts[174] < latency then
 			windower.chat.input('/pet "Shock Squall" '..target) return true
-		elseif (player.main_job == 'SAM') and player.merits.blade_bash and abil_recasts[137] < latency then
+		elseif silent_can_ability('Blade Bash') and abil_recasts[137] < latency then
 			windower.chat.input('/ja "Blade Bash" '..target) return true
 		elseif not player.status == 'Engaged' then
-		elseif (player.main_job == 'DNC' or player.sub_job == 'DNC') and has_finishing_moves() and abil_recasts[221] < latency then
+		elseif (player.main_job == 'DNC' or player.sub_job == 'DNC') and has_finishing_moves() > 0 and abil_recasts[221] < latency then
 			windower.chat.input('/ja "Violent Flourish" '..target) return true
 		end
 	end
@@ -570,7 +565,6 @@ function handle_useitem(cmdParams)
 
 		if equipslot == 'set' or equipslot == 'item' or data.slots.slot_names:contains(equipslot) then
 			useItemSlot = equipslot
-
 			useItem = true
 			if useItemName ~= useitem then
 				add_to_chat(217,"Using "..useitem..", /heal to cancel.")
@@ -973,6 +967,108 @@ function handle_killstatue()
 			end
 		end
 	end
+end
+
+function handle_subjobenmity(cmdParams)
+	handle_enmity(cmdParams)
+end
+
+function handle_enmity(cmdParams)
+	if player.target.type ~= "MONSTER" then
+		add_to_chat(123,'Abort: You are not targeting a monster.')
+		return true
+	end
+	
+	if not silent_check_silence() then
+		local spell_recasts = windower.ffxi.get_spell_recasts()
+		local spells = data.spells.enmity.all
+		
+		if cmdParams:contains('aoe') then
+			spells = data.spells.enmity.aoe
+		elseif cmdParams:contains('single') then
+			spells = data.spells.enmity.single
+		end
+		
+		if cmdParams:contains('target') then
+			remove_table_value(spells, "Foil")
+		end
+
+		for i, spell in ipairs(spells) do
+			local spell_id = get_spell_id_by_name(spell) or nil
+			if silent_can_cast(spell) and spell_recasts[spell_id] < spell_latency and actual_cost(spell_id) < player.mp then
+				windower.chat.input('/ma "'..spell..'" <t>')
+				return true
+			end
+		end
+	end
+	
+	if not silent_check_amnesia() and not (cmdParams:contains('aoe') and cmdParams:contains('target')) then
+		local abil_recasts = windower.ffxi.get_ability_recasts()
+
+		if silent_can_ability('Shield Bash') and has_shield_access() and abil_recasts[73] < latency then
+			windower.chat.input('/ja "Shield Bash" <t>')
+			return true
+		end
+
+		for i, ability in ipairs(data.abilities.enmity.short_cooldown) do
+			local ability_id = get_ability_id_by_name(ability)
+			local ability_recast_id = res.job_abilities[ability_id].recast_id
+			local targets_enemy = res.job_abilities[ability_id].targets:contains('Enemy')
+
+			if silent_can_ability(ability) and abil_recasts[ability_recast_id] < latency and not ((cmdParams:contains('aoe') and targets_enemy) or (cmdParams:contains('target') and not targets_enemy)) then
+				if targets_enemy then
+					windower.chat.input('/ma "'..ability..'" <t>')
+					return true
+				else
+					windower.chat.input('/ma "'..ability..'" <me>')
+					return true
+				end
+			end
+		end
+		
+		if not cmdParams:contains('short') then
+			for i, ability in ipairs(data.abilities.enmity.long_cooldown) do
+				local ability_id = get_ability_id_by_name(ability)
+				local targets_enemy = res.job_abilities[ability_id].targets:contains('Enemy')
+
+				if silent_can_ability(ability) and abil_recasts[ability_recast_id] < latency and not ((cmdParams:contains('aoe') and targets_enemy) or (cmdParams:contains('target') and not targets_enemy)) then
+					if targets_enemy then
+						windower.chat.input('/ma "'..ability..'" <t>')
+						return true
+					else
+						windower.chat.input('/ma "'..ability..'" <me>')
+						return true
+					end
+				end
+			end
+		end
+		
+		if (player.main_job == 'DNC' or player.sub_job == 'DNC') then
+			local finishing_moves = has_finishing_moves()
+
+			if abil_recasts[221] < latency then --221 Is the Recast ID for Flourish 1
+				if finishing_moves >= 2 then
+					windower.chat.input('/ja "Animated Flourish" <t>')
+					return true
+				elseif abil_recasts[220] < latency then --220 is the Recast ID for Steps
+					send_command('input /ja "'..state.CurrentStep.value..'" <t>;wait 1.1;input /ja "Animated Flourish" <t>')
+					return true
+				elseif finishing_moves == 1 then
+					windower.chat.input('/ja "Animated Flourish" <t>')
+					return true
+				end
+			elseif abil_recasts[220] < latency then --220 is the Recast ID for Steps
+				windower.chat.input('/ja "'..state.CurrentStep.value..'" <t>')
+				return true
+			end
+		end
+	end
+	
+	if not cmdParams:contains('auto') then
+		add_to_chat(123,'All available enmity actions on cooldown!')
+	end
+	
+	return false
 end
 
 function handle_runeelement()
@@ -1478,6 +1574,9 @@ end
 
 -- A function for testing lua code.  Called via "gs c test".
 function handle_test(cmdParams)
+
+	add_to_chat(tostring(silent_can_ability('Rampart')))
+
 	if user_test then
 		user_test(cmdParams)
 	elseif job_test then

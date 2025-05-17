@@ -1085,8 +1085,12 @@ function general_post_midcast(spell, spellMap, eventArgs)
 
 				set_elemental_obi_cape_ring(spell, spellMap)
 
-				if spell.element and sets.element[spell.element] then
-					equip(sets.element[spell.element])
+				if spell.element and sets.element[spell.element] and state.CastingMode.value ~= 'Proc' then
+					if sets.element[spell.element][state.CastingMode.value] then
+						equip(sets.element[spell.element][state.CastingMode.value])
+					else
+						equip(sets.element[spell.element])
+					end
 				end
 
 				if state.RecoverMode.value ~= 'Never' and not (state.Buff['Manafont'] or state.Buff['Manawell']) and (state.RecoverMode.value == 'Always' or tonumber(state.RecoverMode.value:sub(1, -2)) > player.mpp) then

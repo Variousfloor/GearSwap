@@ -216,6 +216,12 @@ data.skillchains.reverberation = S{'Water'}
 -- Spell Related Lists and Mappings
 -------------------------------------------------------------------------------------------------------------------
 data.spells = {}
+--Flash1460,Stun1460,Foil1200,Jettatura1200,SheepSong640,GeistWall640,Soporific640,StinkingGas640,BlankGaze640,ColdWave640,Sleep300
+data.spells.enmity = {}
+data.spells.enmity.all = {"Jettatura","Flash","Stun","Foil","Sheep Song","Geist Wall","Soporific","Stinking Gas","Cold Wave","Sleep",}
+data.spells.enmity.single = {"Flash","Stun","Foil","Blank Gaze","Sleep",}
+data.spells.enmity.aoe = {"Foil","Sheep Song","Geist Wall","Soporific","Stinking Gas","Cold Wave","Jettatura"}
+
 
 spell_maps = {
 	['Cure']='Cure',['Cure II']='Cure',['Cure III']='Cure',['Cure IV']='Cure',['Cure V']='Cure',['Cure VI']='Cure',['Full Cure']='Cure',
@@ -332,6 +338,10 @@ data.abilities.white_to_black_stratagems = {['Penury']='Parsimony',['Celerity']=
 
 data.abilities.black_to_white_stratagems = {['Parsimony']='Penury',['Alacrity']='Celerity',['Manifestation']='Accession',['Ebullience']='Rapture',
 	['Focalization']='Altruism',['Equanimity']='Tranquility',['Immanence']='Perpetuance',['Addendum: Black']='Addendum: White'}
+
+data.abilities.enmity = {}
+data.abilities.enmity.short_cooldown = {'Provoke','Boost'}
+data.abilities.enmity.long_cooldown = {'Warcry','Defender','Aggressor','Berserk','Souleater','Last Resort','Arcane Circle'}
 
 -------------------------------------------------------------------------------------------------------------------
 -- Job Related Lists

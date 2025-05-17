@@ -193,112 +193,6 @@ end
     -- Allow jobs to override this code
 function job_self_command(commandArgs, eventArgs)
 
-	if commandArgs[1] == 'RuneElement' then
-		send_command('input /ja "'..state.RuneElement.value..'" <me>')
-
-	elseif commandArgs[1] == 'SubJobEnmity' then
-
-		if player.target.type ~= "MONSTER" then
-			add_to_chat(123,'Abort: You are not targeting a monster.')
-			return
-
-		elseif player.sub_job == 'RUN' then
-			local abil_recasts = windower.ffxi.get_ability_recasts()
-			
-			if abil_recasts[24] < latency then
-				send_command('input /ja "Swordplay" <me>')
-			end
-			
-		elseif player.sub_job == 'BLU' and not moving then
-			local spell_recasts = windower.ffxi.get_spell_recasts()
-					
-			if spell_recasts[584] < spell_latency then
-				windower.chat.input('/ma "Sheep Song" <t>')
-			elseif spell_recasts[598] < spell_latency then
-				windower.chat.input('/ma "Soporific" <t>')
-			elseif spell_recasts[605] < spell_latency then
-				windower.chat.input('/ma "Geist Wall" <t>')
-			elseif spell_recasts[537] < spell_latency then
-				windower.chat.input('/ma "Stinking Gas" <t>')
-			elseif spell_recasts[575] < spell_latency then
-				windower.chat.input('/ma "Jettatura" <t>')
-			elseif spell_recasts[592] < spell_latency then
-				windower.chat.input('/ma "Blank Gaze" <t>')
-			elseif not check_ws() then
-				if not state.AutoTankMode.value then add_to_chat(123,'All Enmity Blue Magic on cooldown.') end
-			end
-
-		elseif player.sub_job == 'DRK' then
-			local abil_recasts = windower.ffxi.get_ability_recasts()
-			local spell_recasts = windower.ffxi.get_spell_recasts()
-			
-			if (state.HybridMode.value ~= 'Normal' or state.DefenseMode.value ~= 'None')  and buffactive['Souleater'] then
-				send_command('cancel souleater')
-			end
-			
-			if (state.HybridMode.value ~= 'Normal' or state.DefenseMode.value ~= 'None')  and buffactive['Last Resort'] then
-				send_command('cancel last resort')
-			end
-			
-			if spell_recasts[252] < spell_latency and not silent_check_silence() then
-				windower.chat.input('/ma "Stun" <t>')
-			elseif abil_recasts[85] < latency then
-				windower.chat.input('/ja "Souleater" <me>')
-			elseif abil_recasts[87] < latency then
-				windower.chat.input('/ja "Last Resort" <me>')
-			elseif abil_recasts[86] < latency then
-				windower.chat.input('/ja "Arcane Circle" <me>')
-			elseif not check_ws() then
-				if not state.AutoTankMode.value then add_to_chat(123,'All Enmity Dark Knight abillities on cooldown.') end
-			end
-
-		elseif player.sub_job == 'WAR' then
-			local abil_recasts = windower.ffxi.get_ability_recasts()
-			
-			if state.HybridMode.value:contains('DD') then
-				if buffactive['Defender'] then send_command('cancel defender') end
-			elseif state.HybridMode.value ~= 'Normal' and not state.HybridMode.value:contains('DD') then
-				if buffactive['Berserk'] then send_command('cancel berserk') end
-			end
-			
-			if abil_recasts[5] < latency then
-				send_command('input /ja "Provoke" <t>')
-			elseif abil_recasts[2] < latency then
-				send_command('input /ja "Warcry" <me>')
-			elseif abil_recasts[3] < latency then
-				send_command('input /ja "Defender" <me>')
-			elseif abil_recasts[4] < latency then
-				send_command('input /ja "Aggressor" <me>')
-			elseif abil_recasts[1] < latency then
-				send_command('input /ja "Berserk" <me>')
-			elseif not check_ws() then
-				if not state.AutoTankMode.value then add_to_chat(123,'All Enmity Warrior Job Abilities on cooldown.') end
-			end
-			
-		elseif player.sub_job == 'DNC' then
-			local abil_recasts = windower.ffxi.get_ability_recasts()
-			local under3FMs = not buffactive['Finishing Move 3'] and not buffactive['Finishing Move 4'] and not buffactive['Finishing Move 5']
-        
-			if under3FMs then
-				if abil_recasts[220] < latency then
-				send_command('@input /ja "'..state.CurrentStep.value..'" <t>')
-				return
-				end
-			elseif abil_recasts[221] < latency then
-				send_command('input /ja "Animated Flourish" <t>')
-				return
-			elseif abil_recasts[220] < latency and not buffactive['Finishing Move 5'] then
-				send_command('@input /ja "'..state.CurrentStep.value..'" <t>')
-				return
-			elseif not check_ws() then
-				if not state.AutoTankMode.value then add_to_chat(123,'Dancer job abilities not needed.') end
-			end
-		else
-			check_ws()
-		end
-
-	end
-
 end
 
 -- Called by the 'update' self-command, for common needs.
@@ -424,10 +318,8 @@ function job_tick()
 	if check_buff() then return true end
 	if job_check_buff() then return true end
 	if state.AutoTankMode.value and in_combat and player.target.type == "MONSTER" and not moving then
-		if check_flash() then return true
-		else 
-			windower.send_command('gs c SubJobEnmity')
-			add_tick_delay()
+		if handle_enmity(S{'auto'}) then
+			add_tick_delay(2)
 			return true
 		end
 	end

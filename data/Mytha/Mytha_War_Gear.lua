@@ -40,7 +40,7 @@ function init_gear_sets()
 	sets.weapons.ProcScythe = {main="Ark Scythe",sub="Niobid Strap"}
 	sets.weapons.ProcPolearm = {main="Pitchfork",sub="Niobid Strap"}
 	sets.weapons.ProcKatana = {main="Debahocho",sub="Beatific Shield +1"}
-	sets.weapons.ProcGreatKatana = {main="Mutsunokami",sub="Niobid Strap"}
+	sets.weapons.ProcGreatKatana = {main="Lotus Katana",sub="Niobid Strap"}
 	sets.weapons.ProcClub = {main="Hagoita",sub="Beatific Shield +1"}
 	sets.weapons.ProcStaff = {main="Caver's Shovel",sub="Niobid Strap"}
 
